@@ -107,7 +107,16 @@ project(":core") {
 
     dependencies {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
-        implementation group: 'com.jayfella', name: 'jme-fastnoise', version: '1.0.2'
+//        implementation group: 'com.jayfella', name: 'jme-fastnoise', version: '1.0.2'
+//        implementation group: 'org.smartboot.http', name: 'smart-http-server', version: '1.1.5'
+//        runtimeOnly group: 'org.openrndr.extra', name: 'orx-noise', version: '0.3.58'
+        // https://mvnrepository.com/artifact/org.matsim.contrib/noise
+//        implementation group: 'org.matsim.contrib', name: 'noise', version: '12.0-2020w02-avoev.0'
+// https://mvnrepository.com/artifact/org.matsim.contrib/noise
+//        implementation group: 'org.matsim.contrib', name: 'noise', version: '12.0'
+// https://mvnrepository.com/artifact/com.flowpowered/flow-noise
+        implementation group: 'com.flowpowered', name: 'flow-noise', version: '1.0.0'
+
 
     }
 }
