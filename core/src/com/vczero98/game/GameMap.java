@@ -23,8 +23,8 @@ public class GameMap {
     private OrthographicCamera camera;
     private final WorldState worldState;
     private static final int TILE_SIZE = 40;
-    private int height = 480 / TILE_SIZE + 2;
-    private int width = 800 / TILE_SIZE + 2;
+    private int height;
+    private int width;
     private static final Color COLOR_SAND = new Color(199 / 255f, 196 / 255f, 54 / 255f, 1);
     private static final Color COLOR_GRASS = new Color(0, 110 / 255f, 29 / 255f, 1);
     private static final Color COLOR_FOREST = new Color(0, 77 / 255f, 20 / 255f, 1);
@@ -33,6 +33,12 @@ public class GameMap {
 
     public GameMap(WorldState worldState, ShapeRenderer shape, OrthographicCamera camera) {
         this.worldState = worldState;
+        height = 480 / TILE_SIZE + 2;
+        width = 800 / TILE_SIZE + 2;
+        if (worldState.getDebugMode()) {
+            height = height * 15;
+            width = width * 15;
+        }
         this.shape = shape;
         this.camera = camera;
     }
@@ -52,6 +58,10 @@ public class GameMap {
         shape.begin(ShapeRenderer.ShapeType.Filled);
         int camX = (int) camera.position.x / TILE_SIZE;
         int camY = (int) camera.position.y / TILE_SIZE;
+        int noneCount = 0;
+        int commonCount = 0;
+        int uncommonCount = 0;
+        int rareCount = 0;
         Gdx.app.log("camera", camera.position.x / TILE_SIZE + " " + camera.position.y / TILE_SIZE);
         for (int x = camX - width / 2; x < camX + width / 2; x++) {
             for (int y = camY - height / 2; y < camY + width / 2; y++) {
@@ -76,11 +86,36 @@ public class GameMap {
                         default:
                             color = COLOR_BLACK;
                     }
+
+                    switch (block.getItemType()) {
+                        case COMMON:
+                            color = Color.BLACK;
+                            commonCount++;
+                            break;
+                        case UNCOMMON:
+                            color = Color.BROWN;
+                            uncommonCount++;
+                            break;
+                        case RARE:
+                            color = Color.PINK;
+                            rareCount++;
+                            break;
+                        default:
+                            noneCount++;
+                    }
                 }
 
                 shape.setColor(color);
                 shape.rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
+
+        }
+        if (worldState.getDebugMode()) {
+            int total = noneCount + commonCount + uncommonCount + rareCount;
+            Gdx.app.log(    "Items", "NONE: " + noneCount / (float) total * 100 + "% "
+                    + "COMMON: " + commonCount / (float) total * 100 + "% "
+                    + "UNCOMMON: " + uncommonCount / (float) total * 100 + "% "
+                    + "RARE: " + rareCount / (float) total * 100 + "% ");
         }
         shape.end();
     }

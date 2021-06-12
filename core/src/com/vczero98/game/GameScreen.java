@@ -15,7 +15,7 @@ public class GameScreen implements Screen {
     private final MyGdxGame game;
     private OrthographicCamera camera = new OrthographicCamera();
     private GameMap gameMap;
-    private int cameraSpeed = 3;
+    private int cameraSpeed = 120;
     private ShapeRenderer shape = new ShapeRenderer();
     private Thumbstick thumbstick = new Thumbstick();
     private WorldState worldState = new WorldState(123);
@@ -24,6 +24,10 @@ public class GameScreen implements Screen {
         this.game = game;
 
         camera.setToOrtho(false, 800, 480);
+        if (worldState.getDebugMode()) {
+            camera.zoom = 15;
+        }
+        Gdx.app.log("Camera", "Zoom: " + camera.zoom);
 
         gameMap = new GameMap(worldState, shape, camera);
     }
@@ -37,9 +41,9 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         Gdx.gl.glEnable(GL30.GL_BLEND);
         Gdx.gl.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
+        ScreenUtils.clear(0,0,0.2f, 1);
 
-//        0,0,0.2f, 1
-        handleInput();
+        handleInput(delta);
         camera.update();
         gameMap.update();
         thumbstick.update();
@@ -54,22 +58,22 @@ public class GameScreen implements Screen {
         game.batch.end();
     }
 
-    private void handleInput() {
+    private void handleInput(float dt) {
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            camera.translate(-cameraSpeed, 0);
+            camera.translate(-cameraSpeed * dt, 0);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            camera.translate(cameraSpeed, 0);
+            camera.translate(cameraSpeed * dt, 0);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            camera.translate(0, -cameraSpeed);
+            camera.translate(0, -cameraSpeed * dt);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            camera.translate(0, cameraSpeed);
+            camera.translate(0, cameraSpeed * dt);
         }
 
         if (thumbstick.xSpeed != 0f || thumbstick.ySpeed != 0f) {
-            camera.translate(cameraSpeed * thumbstick.xSpeed, cameraSpeed * thumbstick.ySpeed);
+            camera.translate(cameraSpeed * thumbstick.xSpeed * dt, cameraSpeed * thumbstick.ySpeed * dt);
         }
     }
 
