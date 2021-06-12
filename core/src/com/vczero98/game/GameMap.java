@@ -19,10 +19,9 @@ import java.util.HashMap;
 import java.util.Random;
 
 public class GameMap {
-    private ShapeRenderer shape;
+    public static final int TILE_SIZE = 40;
     private OrthographicCamera camera;
     private final WorldState worldState;
-    private static final int TILE_SIZE = 40;
     private int height;
     private int width;
     private static final Color COLOR_SAND = new Color(199 / 255f, 196 / 255f, 54 / 255f, 1);
@@ -31,7 +30,7 @@ public class GameMap {
     private static final Color COLOR_WATER = new Color(0, 0, 1, 1);
     private static final Color COLOR_BLACK = new Color(0, 0, 0, 1);
 
-    public GameMap(WorldState worldState, ShapeRenderer shape, OrthographicCamera camera) {
+    public GameMap(WorldState worldState, OrthographicCamera camera) {
         this.worldState = worldState;
         height = 480 / TILE_SIZE + 2;
         width = 800 / TILE_SIZE + 2;
@@ -39,7 +38,6 @@ public class GameMap {
             height = height * 15;
             width = width * 15;
         }
-        this.shape = shape;
         this.camera = camera;
     }
 
@@ -54,7 +52,7 @@ public class GameMap {
         }
     }
 
-    public void draw() {
+    public void draw(ShapeRenderer shape) {
         shape.begin(ShapeRenderer.ShapeType.Filled);
         int camX = (int) camera.position.x / TILE_SIZE;
         int camY = (int) camera.position.y / TILE_SIZE;

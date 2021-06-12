@@ -21,7 +21,7 @@ public class Thumbstick implements Tappable {
     private Color backColor = new Color(0.8f, 0.8f, 0.8f, 0.8f);
     private Color borderColor = new Color(0, 0, 0, 1);
     private static final int RADIUS = 60;
-    private static final int MARGIN = 30;
+    private static final int MARGIN = 40;
     public float xSpeed = 0;
     public float ySpeed = 0;
     private int innerCircleCentreX = 0;

@@ -9,16 +9,17 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.vczero98.game.controls.Thumbstick;
+import com.vczero98.game.world.Player;
 import com.vczero98.game.world.WorldState;
 
 public class GameScreen implements Screen {
     private final MyGdxGame game;
     private OrthographicCamera camera = new OrthographicCamera();
     private GameMap gameMap;
-    private int cameraSpeed = 120;
     private ShapeRenderer shape = new ShapeRenderer();
     private Thumbstick thumbstick = new Thumbstick();
     private WorldState worldState = new WorldState(123);
+    private final Player player;
 
     public GameScreen(final MyGdxGame game) {
         this.game = game;
@@ -26,10 +27,11 @@ public class GameScreen implements Screen {
         camera.setToOrtho(false, 800, 480);
         if (worldState.getDebugMode()) {
             camera.zoom = 15;
+            Gdx.app.log("Camera", "Camera x: " + camera.position.x + ", y: " + camera.position.y);
         }
-        Gdx.app.log("Camera", "Zoom: " + camera.zoom);
 
-        gameMap = new GameMap(worldState, shape, camera);
+        gameMap = new GameMap(worldState, camera);
+        player = new Player(worldState, camera, thumbstick);
     }
 
     @Override
@@ -43,38 +45,20 @@ public class GameScreen implements Screen {
         Gdx.gl.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
         ScreenUtils.clear(0,0,0.2f, 1);
 
-        handleInput(delta);
         camera.update();
         gameMap.update();
         thumbstick.update();
+        player.update(delta);
 //        Gdx.app.log("tapped", "xSpeed: " + thumbstick.xSpeed + ", ySpeed: " + thumbstick.ySpeed);
 
         game.batch.setProjectionMatrix(camera.combined);
         shape.setProjectionMatrix(camera.combined);
         game.batch.begin();
-        gameMap.draw();
+        gameMap.draw(shape);
+        player.draw(shape);
 //        game.font.draw(game.batch, "Hello, Game!", 10, 400-10);
         thumbstick.draw();
         game.batch.end();
-    }
-
-    private void handleInput(float dt) {
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            camera.translate(-cameraSpeed * dt, 0);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            camera.translate(cameraSpeed * dt, 0);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            camera.translate(0, -cameraSpeed * dt);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            camera.translate(0, cameraSpeed * dt);
-        }
-
-        if (thumbstick.xSpeed != 0f || thumbstick.ySpeed != 0f) {
-            camera.translate(cameraSpeed * thumbstick.xSpeed * dt, cameraSpeed * thumbstick.ySpeed * dt);
-        }
     }
 
     @Override

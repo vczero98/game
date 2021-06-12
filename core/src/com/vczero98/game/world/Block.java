@@ -24,4 +24,8 @@ public class Block {
     public void setType(BlockType type) {
         this.type = type;
     }
+    
+    public String toString() {
+        return "Type: " + type + ", Item: " + itemType;
+    }
 }
