@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.Array;
 import com.flowpowered.noise.module.source.Perlin;
 import com.vczero98.game.world.Block;
 import com.vczero98.game.world.BlockType;
+import com.vczero98.game.world.ItemType;
 import com.vczero98.game.world.WorldState;
 //import com.jayfella.fastnoise.FastNoise;
 
@@ -29,6 +30,7 @@ public class GameMap {
     private static final Color COLOR_FOREST = new Color(0, 77 / 255f, 20 / 255f, 1);
     private static final Color COLOR_WATER = new Color(0, 0, 1, 1);
     private static final Color COLOR_BLACK = new Color(0, 0, 0, 1);
+    private static final Color COLOR_TREE = new Color(0 / 255f, 51 / 255f, 2 / 255f, 1);
 
     public GameMap(WorldState worldState, OrthographicCamera camera) {
         this.worldState = worldState;
@@ -44,7 +46,7 @@ public class GameMap {
     public void update() {
         int camX = (int) camera.position.x / TILE_SIZE;
         int camY = (int) camera.position.y / TILE_SIZE;
-        Gdx.app.log("camera", camera.position.x / TILE_SIZE + " " + camera.position.y / TILE_SIZE);
+//        Gdx.app.log("camera", camera.position.x / TILE_SIZE + " " + camera.position.y / TILE_SIZE);
         for (int x = camX - width / 2; x < camX + width / 2; x++) {
             for (int y = camY - height / 2; y < camY + width / 2; y++) {
                 worldState.generateBlock(x, y);
@@ -60,7 +62,7 @@ public class GameMap {
         int commonCount = 0;
         int uncommonCount = 0;
         int rareCount = 0;
-        Gdx.app.log("camera", camera.position.x / TILE_SIZE + " " + camera.position.y / TILE_SIZE);
+//        Gdx.app.log("camera", camera.position.x / TILE_SIZE + " " + camera.position.y / TILE_SIZE);
         for (int x = camX - width / 2; x < camX + width / 2; x++) {
             for (int y = camY - height / 2; y < camY + width / 2; y++) {
                 Block block = worldState.getBlock(x, y);
@@ -79,28 +81,32 @@ public class GameMap {
                             color = COLOR_GRASS;
                             break;
                         case FOREST:
-                            color = COLOR_FOREST;
+                            if (block.getItemType() == ItemType.NONE) {
+                                color = COLOR_FOREST;
+                            } else {
+                                color = COLOR_TREE;
+                            }
                             break;
                         default:
                             color = COLOR_BLACK;
                     }
-
-                    switch (block.getItemType()) {
-                        case COMMON:
-                            color = Color.BLACK;
-                            commonCount++;
-                            break;
-                        case UNCOMMON:
-                            color = Color.BROWN;
-                            uncommonCount++;
-                            break;
-                        case RARE:
-                            color = Color.PINK;
-                            rareCount++;
-                            break;
-                        default:
-                            noneCount++;
-                    }
+//
+//                    switch (block.getItemType()) {
+//                        case COMMON:
+//                            color = Color.BLACK;
+//                            commonCount++;
+//                            break;
+//                        case UNCOMMON:
+//                            color = Color.BROWN;
+//                            uncommonCount++;
+//                            break;
+//                        case RARE:
+//                            color = Color.PINK;
+//                            rareCount++;
+//                            break;
+//                        default:
+//                            noneCount++;
+//                    }
                 }
 
                 shape.setColor(color);

@@ -6,32 +6,46 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.utils.Logger;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.FillViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.vczero98.game.controls.Thumbstick;
 import com.vczero98.game.world.Player;
 import com.vczero98.game.world.WorldState;
 
 public class GameScreen implements Screen {
     private final MyGdxGame game;
-    private OrthographicCamera camera = new OrthographicCamera();
-    private GameMap gameMap;
-    private ShapeRenderer shape = new ShapeRenderer();
-    private Thumbstick thumbstick = new Thumbstick();
-    private WorldState worldState = new WorldState(123);
+    private final OrthographicCamera gameCamera = new OrthographicCamera();
+    private final OrthographicCamera uiCamera = new OrthographicCamera();
+    private final Stage gameStage;
+    private final Stage uiStage;
+    private final GameMap gameMap;
+    private final ShapeRenderer shape = new ShapeRenderer();
+    private final Thumbstick thumbstick;
     private final Player player;
 
     public GameScreen(final MyGdxGame game) {
         this.game = game;
 
-        camera.setToOrtho(false, 800, 480);
+//        gamePort = new ExtendViewport(800, 480, gameCamera);
+        gameStage = new Stage(new FillViewport(800, 480, gameCamera));
+        uiStage = new Stage(new ScreenViewport(uiCamera));
+
+        thumbstick = new Thumbstick(uiCamera);
+
+        //800, 480, gameCamera
+        gameCamera.setToOrtho(false, 800, 480);
+//        uiCamera.setToOrtho(false, );
+
+        WorldState worldState = new WorldState(123);
         if (worldState.getDebugMode()) {
-            camera.zoom = 15;
-            Gdx.app.log("Camera", "Camera x: " + camera.position.x + ", y: " + camera.position.y);
+            gameCamera.zoom = 15;
+            Gdx.app.log("Camera", "Camera x: " + gameCamera.position.x + ", y: " + gameCamera.position.y);
         }
 
-        gameMap = new GameMap(worldState, camera);
-        player = new Player(worldState, camera, thumbstick);
+        gameMap = new GameMap(worldState, gameCamera);
+        player = new Player(worldState, gameCamera, thumbstick);
     }
 
     @Override
@@ -45,25 +59,31 @@ public class GameScreen implements Screen {
         Gdx.gl.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
         ScreenUtils.clear(0,0,0.2f, 1);
 
-        camera.update();
+        player.update(delta);
         gameMap.update();
         thumbstick.update();
-        player.update(delta);
+        gameCamera.update();
+        uiCamera.update();
+
 //        Gdx.app.log("tapped", "xSpeed: " + thumbstick.xSpeed + ", ySpeed: " + thumbstick.ySpeed);
 
-        game.batch.setProjectionMatrix(camera.combined);
-        shape.setProjectionMatrix(camera.combined);
+        gameStage.getViewport().apply();
+        game.batch.setProjectionMatrix(gameCamera.combined);
+        shape.setProjectionMatrix(gameCamera.combined);
         game.batch.begin();
         gameMap.draw(shape);
         player.draw(shape);
 //        game.font.draw(game.batch, "Hello, Game!", 10, 400-10);
+        uiStage.getViewport().apply();
         thumbstick.draw();
         game.batch.end();
     }
 
     @Override
     public void resize(int width, int height) {
-
+        gameStage.getViewport().update(width, height);
+        uiCamera.setToOrtho(false, width, height);
+        uiStage.getViewport().update(width, height);
     }
 
     @Override

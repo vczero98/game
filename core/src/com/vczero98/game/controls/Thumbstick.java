@@ -5,7 +5,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,13 +18,13 @@ class Point {
     int y;
 }
 
-public class Thumbstick implements Tappable {
-    private ShapeRenderer shape = new ShapeRenderer();
-    private OrthographicCamera camera = new OrthographicCamera();
-    private Color backColor = new Color(0.8f, 0.8f, 0.8f, 0.8f);
-    private Color borderColor = new Color(0, 0, 0, 1);
-    private static final int RADIUS = 60;
-    private static final int MARGIN = 40;
+public class Thumbstick extends Actor implements Tappable {
+    private final ShapeRenderer shape = new ShapeRenderer();
+    private final OrthographicCamera camera;
+    private final Color backColor = new Color(0.8f, 0.8f, 0.8f, 0.8f);
+    private final Color borderColor = new Color(0, 0, 0, 1);
+    private int radius = 0;
+    private int margin = 0;
     public float xSpeed = 0;
     public float ySpeed = 0;
     private int innerCircleCentreX = 0;
@@ -31,21 +34,24 @@ public class Thumbstick implements Tappable {
     private final Point onCircle = new Point();
     private static final int VIEWPORT_WIDTH = 800;
     private static final int VIEWPORT_HEIGHT = 480;
-    private Vector3 inputVector = new Vector3();
-    private Vector3 unprojectedInputVector = new Vector3();
+    private final Vector3 inputVector = new Vector3();
+    private final Vector3 unprojectedInputVector = new Vector3();
 
-    public Thumbstick() {
-        camera.setToOrtho(false, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+    public Thumbstick(OrthographicCamera camera) {
+        this.camera = camera;
     }
 
     public void update() {
-        innerCircleCentreX = RADIUS + MARGIN;
+        radius = (int) (camera.viewportHeight / 7.5f);
+        margin = (int) (camera.viewportHeight / 8f);
+
+        innerCircleCentreX = radius + margin;
         innerCircleCentreY = innerCircleCentreX;
 
         inputVector.set(Gdx.input.getX(), Gdx.input.getY(), 0);
         unprojectedInputVector.set(camera.unproject(inputVector));
 
-        int centre = RADIUS + MARGIN;
+        int centre = radius + margin;
 //        Gdx.app.log("tapped", "x: " + x + ", y:" + y);
 
         // Draw inner circle
@@ -58,20 +64,31 @@ public class Thumbstick implements Tappable {
         } else if (isActive) {
             p.x = (int) unprojectedInputVector.x;
             p.y = (int) unprojectedInputVector.y;
-            Point onCircle = getPointOnCircle(p);
-            innerCircleCentreX = onCircle.x;
-            innerCircleCentreY = onCircle.y;
+            if (p.x == centre) {
+                // Fix a glitch where the thumbstick is min/max X direction and the getPointOnCircle formula breaks
+                if (p.y > centre) {
+                    innerCircleCentreX = centre;
+                    innerCircleCentreY = centre + radius;
+                } else {
+                    innerCircleCentreX = centre;
+                    innerCircleCentreY = centre - radius;
+                }
+            } else {
+                Point onCircle = getPointOnCircle(p);
+                innerCircleCentreX = onCircle.x;
+                innerCircleCentreY = onCircle.y;
+            }
         }
 
         int deltaX = innerCircleCentreX - centre;
         int deltaY = innerCircleCentreY - centre;
-        xSpeed = deltaX / (float) RADIUS;
-        ySpeed = deltaY / (float) RADIUS;
+        xSpeed = deltaX / (float) radius;
+        ySpeed = deltaY / (float) radius;
     }
 
     private Point getPointOnCircle(Point point) {
-        int centre = MARGIN + RADIUS;
-        double a = (centre - (RADIUS * (centre - point.x))/Math.sqrt(Math.pow(centre - point.x,2)+Math.pow(centre - point.y, 2)));
+        int centre = margin + radius;
+        double a = (centre - (radius * (centre - point.x))/Math.sqrt(Math.pow(centre - point.x,2)+Math.pow(centre - point.y, 2)));
         double b = (((centre - point.y)/(double) (centre - point.x))*(a - point.x)+point.y);
 //        Point intercept = new Point();
         onCircle.x = (int) a;
@@ -80,16 +97,15 @@ public class Thumbstick implements Tappable {
     }
 
     public void draw() {
-        camera.update();
         shape.setProjectionMatrix(camera.combined);
         for (int i = 0; i < 2; i++) {
             shape.begin(i == 0 ? ShapeRenderer.ShapeType.Filled : ShapeRenderer.ShapeType.Line);
             shape.setColor(i == 0 ? backColor : borderColor);
 
             // Draw outer circle
-            shape.circle(RADIUS + MARGIN, RADIUS + MARGIN, RADIUS);
+            shape.circle(radius + margin, radius + margin, radius);
 
-            shape.circle(innerCircleCentreX, innerCircleCentreY, RADIUS * 0.6f);
+            shape.circle(innerCircleCentreX, innerCircleCentreY, radius * 0.6f);
 
             shape.end();
         }
@@ -100,10 +116,10 @@ public class Thumbstick implements Tappable {
     }
 
     private boolean isFingerOverThumbstick() {
-        int centre = RADIUS + MARGIN;
+        int centre = radius + margin;
         int distance = (int) getDistance(centre, centre, (int) unprojectedInputVector.x, (int) unprojectedInputVector.y);
 //        Gdx.app.log("tapped", "distance: " + distance);
-        return distance < RADIUS;
+        return distance < radius;
     }
 
     private double getDistance(int x1, int y1, int x2, int y2) {

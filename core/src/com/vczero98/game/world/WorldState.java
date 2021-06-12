@@ -57,7 +57,11 @@ public class WorldState {
     }
 
     public Block getBlock(int x, int y) {
-        return blocks.get(x + "," + y);
+        Block block = blocks.get(x + "," + y);
+        if (block == null) {
+           return generateBlock(x, y);
+        }
+        return block;
     }
 
     public void setBlock(int x, int y, Block block) {
@@ -65,7 +69,7 @@ public class WorldState {
     }
 
     public Block generateBlock(int x, int y) {
-        Block block = getBlock(x, y);
+        Block block = blocks.get(x + "," + y);
         if (block != null) return block;
 
         double perlinIslandVal = getPerlinVal(perlinIsland, x, y);
@@ -102,7 +106,6 @@ public class WorldState {
         } else if (perlinItemRareVal > 0.99d) {
             block.setItemType(ItemType.RARE);
         }
-
 
         setBlock(x, y, block);
         return block;
