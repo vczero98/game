@@ -81,7 +81,8 @@ project(":ios") {
         api "com.mobidevelop.robovm:robovm-cocoatouch:$roboVMVersion"
         api "com.badlogicgames.gdx:gdx-backend-robovm:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-ios"
-        
+        implementation group: 'com.flowpowered', name: 'flow-noise', version: '1.0.0'
+
     }
 }
 

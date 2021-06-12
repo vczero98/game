@@ -9,22 +9,23 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.vczero98.game.controls.Thumbstick;
+import com.vczero98.game.world.WorldState;
 
 public class GameScreen implements Screen {
     private final MyGdxGame game;
     private OrthographicCamera camera = new OrthographicCamera();
     private GameMap gameMap;
-    private int cameraSpeed = 5;
+    private int cameraSpeed = 3;
     private ShapeRenderer shape = new ShapeRenderer();
     private Thumbstick thumbstick = new Thumbstick();
+    private WorldState worldState = new WorldState(123);
 
     public GameScreen(final MyGdxGame game) {
         this.game = game;
 
         camera.setToOrtho(false, 800, 480);
 
-        gameMap = new GameMap(shape);
-        gameMap.generate();
+        gameMap = new GameMap(worldState, shape, camera);
     }
 
     @Override
@@ -36,10 +37,12 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         Gdx.gl.glEnable(GL30.GL_BLEND);
         Gdx.gl.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
-        ScreenUtils.clear(0,0,0.2f, 1);
-        camera.update();
-        thumbstick.update();
+
+//        0,0,0.2f, 1
         handleInput();
+        camera.update();
+        gameMap.update();
+        thumbstick.update();
 //        Gdx.app.log("tapped", "xSpeed: " + thumbstick.xSpeed + ", ySpeed: " + thumbstick.ySpeed);
 
         game.batch.setProjectionMatrix(camera.combined);
